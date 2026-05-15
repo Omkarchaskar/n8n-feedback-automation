@@ -1,0 +1,301 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "1) read the code realated mail then trigger\n2) summarize the code using LLM\n3) generate the comment \n4) do step 2 and 3 in parallel\n5)mergre the output of step 2 and 3 \n6) Send the output to me as mail."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "e36b3c25-af31-4d2c-820f-7f65aeb3affa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": " omkarchaskar.scoe.it@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "400cda56-c664-4ca7-aac8-453295cd4c88",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Y2RWtI8m5Vyuf1yL",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "ca4accba-f3c7-4de1-9a25-168ff201a19d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ERLgrAEVw91g6sIS",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=given the code below \nCode: {{ $json.snippet }}\nGenerate comments for the code so that i can ununderstand what each linr of the code does.\nNote:Do not modify the existing code lines \nat all.\nJust add the comments wherever require",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "you are an python expert who have ability to undersand python and write simple comments "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        -240
+      ],
+      "id": "37b843c9-46b2-467a-a94f-c99f132db322",
+      "name": "Coomets addition llm chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        288
+      ],
+      "id": "7cdeb0a4-21e7-405e-9e6c-d219d8c459ae",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "ERLgrAEVw91g6sIS",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Given the code below \ncode: {{ $json.snippet }}\n\ngenerate a summary of what this code does in very simple language . Do note that the summary should contain all in imporatnt  details there are in the code so that i will get to know what this code is about at single glance",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert in python code to have the ability to summarize code in simple lanaguage and have the knack to cover important detials in summary"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        80
+      ],
+      "id": "6fec6449-8c3d-41a5-a92e-fdea1e9e2fc0",
+      "name": "summary LLm chain"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        320,
+        -64
+      ],
+      "id": "a4ff3d7d-4872-4642-b0c2-6807ef16470c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "omkarchaskar.scoe.it@gmail.com",
+        "emailType": "text",
+        "message": "The Summary and Commenst to Node is-",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "aeae308f-e31f-4a10-933d-2af090328548",
+      "name": "Send a message",
+      "webhookId": "d5e4f0a6-c298-4059-96e5-bf030eacf3e8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Y2RWtI8m5Vyuf1yL",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19ddd1769d44969a",
+          "threadId": "19ddd167149678e5",
+          "snippet": "import random import string import math class DataGenerator: def __init__(self, size): self.size = size self.data = [] def generate_numbers(self): self.data = [random.randint(1, 1000) for _ in range(",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 9337,
+          "historyId": "742924",
+          "internalDate": "1777530791000",
+          "labels": [
+            {
+              "id": "SENT",
+              "name": "SENT"
+            },
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "IMPORTANT",
+              "name": "IMPORTANT"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "Subject": "Code",
+          "From": "omkar chaskar <omkarchaskar.scoe.it@gmail.com>",
+          "To": "omkar chaskar <omkarchaskar.scoe.it@gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Coomets addition llm chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "summary LLm chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Coomets addition llm chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "summary LLm chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coomets addition llm chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summary LLm chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "416b37b8-2b0b-4006-826a-85f080cd52a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d2faf46c14e8c6398d82031e962408ac57f444e8d9bfbddd98be6f57083eedf6"
+  },
+  "id": "osoi5BIUzTiULsiw",
+  "tags": []
+}
